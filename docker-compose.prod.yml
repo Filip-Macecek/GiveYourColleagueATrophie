@@ -10,6 +10,33 @@ networks:
     driver: bridge
 
 services:
+  initcerts:
+    image: alpine:3.20
+    container_name: trophy3d-initcerts
+    env_file:
+      - .env.production
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+    entrypoint: /bin/sh
+    command: >-
+      -c "
+      set -e;
+      apk add --no-cache openssl;
+      DOMAIN=$${DOMAIN:-giveyourcollagueatrophie.online};
+      CERTDIR=/etc/letsencrypt/live/$${DOMAIN};
+      mkdir -p \"$${CERTDIR}\";
+      if [ ! -f \"$${CERTDIR}/privkey.pem\" ] || [ ! -f \"$${CERTDIR}/fullchain.pem\" ]; then
+        echo 'Generating temporary self-signed certificate for Nginx startup...';
+        openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
+          -subj \"/CN=$${DOMAIN}\" \
+          -keyout \"$${CERTDIR}/privkey.pem\" \
+          -out \"$${CERTDIR}/fullchain.pem\";
+      fi;
+      echo 'Init certs complete';
+      "
+    networks:
+      - app
+    restart: "no"
   backend:
     build:
       context: .
@@ -57,6 +84,7 @@ services:
     image: nginx:1.25-alpine
     container_name: trophy3d-nginx
     depends_on:
+      - initcerts
       - backend
       - frontend
     ports:
