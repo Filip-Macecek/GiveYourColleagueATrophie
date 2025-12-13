@@ -11,9 +11,11 @@ RUN if [ -f package-lock.json ]; then npm ci; elif [ -f yarn.lock ]; then yarn i
 
 # Copy source
 COPY frontend/src ./src
-COPY frontend/public ./public
 COPY frontend/tsconfig.json frontend/tsconfig.node.json frontend/vite.config.ts frontend/vitest.config.ts ./
 COPY frontend/index.html ./
+
+# Copy public directory if it exists and has content
+RUN mkdir -p ./public
 
 # Build application
 RUN npm run build
