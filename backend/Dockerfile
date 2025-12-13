@@ -20,6 +20,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
 WORKDIR /app
 
+# Install curl for container health checks
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends curl \
+	&& rm -rf /var/lib/apt/lists/*
+
 # Copy built application
 COPY --from=builder /app/build .
 

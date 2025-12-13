@@ -11,6 +11,11 @@ dist/
 build/
 .next/
 
+# .NET build artifacts
+bin/
+obj/
+.vs/
+
 # Development files
 src/
 *.ts
@@ -29,6 +34,9 @@ coverage/
 # Environment files
 .env
 .env.local
+.env.development
+.env.production
+.env.prod*
 
 # Logs
 *.log

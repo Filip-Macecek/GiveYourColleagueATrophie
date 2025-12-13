@@ -1,0 +1,19 @@
+openapi: 3.0.3
+info:
+  title: Trophy3D API
+  version: 1.0.0
+servers:
+  - url: https://giveyourcollagueatrophie.online/api
+paths:
+  /sessions:
+    post:
+      summary: Create a session
+      responses:
+        '200':
+          description: Session created
+  /trophies:
+    post:
+      summary: Submit a trophy
+      responses:
+        '200':
+          description: Trophy submitted

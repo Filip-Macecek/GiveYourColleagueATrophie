@@ -28,49 +28,42 @@
 
 ---
 
-### 2. Certbot Certificate Renewal with Systemd Timer
+### 2. Certificate Management via ACME/Certbot Companion (Containerized)
 
-**Decision**: Certbot on VPS host with systemd timer for daily renewal checks  
-**Rationale**: Certbot is the de-facto standard for Let's Encrypt automation. Systemd timer is more reliable than cron for modern Linux systems and has better logging integration.
+**Decision**: Run ACME/certbot companion as a container alongside Nginx under docker-compose for automated issuance/renewal  
+**Rationale**: Keeps infra dependencies within compose, simplifies automation and portability, avoids host-level systemd/cron and manual Nginx setup.
 
 **Implementation Details**:
-- Install certbot on VPS: `apt-get install certbot python3-certbot-nginx`
-- Initial certificate: `certbot certonly --standalone -d giveyourcollagueatrophie.online`
-- Nginx configuration: Reference certificate files from `/etc/letsencrypt/live/giveyourcollagueatrophie.online/`
-- Automatic renewal: Certbot runs daily via systemd timer (pre-configured in certbot package)
-- Renewal command: `certbot renew --quiet` (with Nginx plugin for auto-reload)
-- Logs: Check with `journalctl -u certbot.service`
+- Add `acme` service to docker-compose; share named volume `letsencrypt` mounted at `/etc/letsencrypt`
+- Configure domain and email via environment variables; ACME companion handles issuance and renewal
+- Nginx container references certificate files from `/etc/letsencrypt/live/<domain>/`
+- Automatic renewal: Handled internally by companion; Nginx reloaded via container hooks
+- Logs: View container logs for renewal status
 
-**Pre-Renewal Hook for Nginx**:
-- Configure certbot to execute hook: Nginx must reload after renewal
-- Hook script: `/etc/letsencrypt/renewal-hooks/post/nginx-reload.sh`
-- Content: `#!/bin/bash` + `nginx -t && systemctl reload nginx`
+**Reload Behavior**:
+- Companion triggers Nginx reload on renewal within the compose network; no host-level systemd required
 
 **Alternatives Considered**:
-- Manual renewal: Administrative overhead; high risk of downtime
-- Docker-based Certbot (sidecar): Complexity of volume sharing; less reliable
-- Cloud-managed certificates (AWS/DigitalOcean): Vendor lock-in; not available on generic VPS
+- Host-installed Certbot with systemd: External dependency and manual setup
+- Cloud-managed certificates (AWS/DigitalOcean): Vendor lock-in; not applicable to generic VPS
 
 **Reference**: [Certbot Documentation](https://certbot.eff.org/), [Let's Encrypt Rate Limits](https://letsencrypt.org/docs/rate-limits/)
 
 ---
 
-### 3. Nginx Reverse Proxy Configuration
+### 3. Nginx Reverse Proxy Configuration (Containerized)
 
-**Decision**: Nginx on VPS host (not containerized) serving as reverse proxy to application container  
-**Rationale**: 
-- Nginx must be on host level to manage certificates and reload on renewal
-- Separating Nginx from app container allows for graceful reloads without app downtime
-- Host-level Nginx can manage Docker networking seamlessly
+**Decision**: Nginx runs as a container under docker-compose; terminates TLS and proxies to app services  
+**Rationale**: Containerized proxy aligns with compose-managed infra; simpler automation with ACME companion and volume-shared certs.
 
 **Configuration Structure**:
-- `nginx.conf`: Main Nginx configuration
-- `sites-available/giveyourcollagueatrophie.online`: Virtual host configuration
+- `nginx.conf`: Main Nginx configuration bundled/mounted into the Nginx container
 - Key directives:
-  - `ssl_protocols TLSv1.2 TLSv1.3` (secure)
-  - `ssl_ciphers HIGH:!aNULL:!MD5` (modern ciphers)
-  - `proxy_pass http://localhost:8080` (or internal container IP:port)
-  - `error_page 497 =301 https://$host$request_uri` (HTTP redirect)
+  - `ssl_protocols TLSv1.2 TLSv1.3`
+  - `ssl_ciphers HIGH:!aNULL:!MD5`
+  - `proxy_pass http://backend:5000` for `/api/`
+  - `proxy_pass http://frontend:3000` for `/`
+  - `error_page 497 =301 https://$host$request_uri`
 
 **Alternatives Considered**:
 - Apache: More complex; heavier; not necessary for this use case
@@ -81,26 +74,17 @@
 
 ---
 
-### 4. Single Container Architecture (Frontend + Backend)
+### 4. Separate Frontend + Backend Containers
 
-**Decision**: Both frontend (static React build) and backend (ASP.NET Core) in same container  
-**Rationale**: 
-- ASP.NET Core can serve both static files and API routes from the same process
-- Simplifies routing: no need for separate frontend service
-- Reduces operational complexity on production VPS
-- Standard pattern for monolithic web applications
+**Decision**: Keep frontend and backend in separate containers; route via Nginx path-based rules  
+**Rationale**:
+- Matches current repo structure and spec decisions
+- Cleaner separation of concerns; independent build pipelines
+- Easier scaling/health checks per service
 
 **Implementation Approach**:
-- Frontend build output (React dist folder) copied into backend Docker image
-- ASP.NET Core configured to serve static files from `/wwwroot/`
-- Routing: API requests to `/api/*` handled by backend controllers; other requests served as static files with fallback to `index.html` for SPA routing
-- Configuration in `Program.cs`: 
-  ```csharp
-  app.UseStaticFiles();
-  app.UseRouting();
-  app.MapControllers();
-  app.MapFallbackToFile("index.html");
-  ```
+- Frontend container serves static assets (e.g., via Nginx or node preview server);
+- Backend container serves ASP.NET Core API on `/api/*` at internal port 5000; Nginx proxies.
 
 **Alternatives Considered**:
 - Separate frontend/backend containers: More complex Nginx routing; duplicate cert management
@@ -189,18 +173,25 @@ networks:
 
 ### 7. Certificate Storage and Persistence
 
-**Decision**: Host-level `/etc/letsencrypt/live/` directory with Docker volume mount  
+**Decision**: Named Docker volume `letsencrypt` mounted at `/etc/letsencrypt` in both Nginx and ACME/cert containers  
 **Rationale**: 
-- Certificates must survive container restarts
-- Certbot manages certificates at host level; safer to leave there
-- Nginx reads from same location; single source of truth
-- Standard Let's Encrypt directory structure; widely understood
+- Certificates survive container restarts via volumes
+- Standard path simplifies config
+- No host-level dependency
 
 **Volume Mounting Strategy**:
 ```yaml
 volumes:
-  - /etc/letsencrypt:/etc/letsencrypt:ro  # Read-only mount for certs in Nginx
-  - /etc/letsencrypt/live:/app/certs:ro   # Alternative: app container access if needed
+  letsencrypt:
+    driver: local
+
+services:
+  nginx:
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+  acme:
+    volumes:
+      - letsencrypt:/etc/letsencrypt
 ```
 
 **Nginx Configuration**:
@@ -212,8 +203,8 @@ ssl_certificate_key /etc/letsencrypt/live/giveyourcollagueatrophie.online/privke
 **Backup Strategy**: Recommend backing up `/etc/letsencrypt/` to secure storage (S3, encrypted drive, etc.)
 
 **Alternatives Considered**:
-- Docker named volume: Harder to backup; less transparent
-- Copy certs into container at build time: Defeats purpose of auto-renewal
+- Bind mount host `/etc/letsencrypt`: Adds host dependency
+- Copy certs into container at build time: Defeats auto-renewal
 
 **Reference**: [Certbot File Permissions](https://certbot.eff.org/docs/using.html#best-practices)
 

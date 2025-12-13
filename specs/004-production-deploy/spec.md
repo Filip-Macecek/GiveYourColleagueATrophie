@@ -13,16 +13,20 @@
 - Q: How should SSL/TLS certificates be automatically renewed? → A: Certbot with systemd/cron. Certbot runs daily renewal checks on the VPS host system with automatic web server reload on certificate change. Certificates persist in /etc/letsencrypt/live/ across container restarts.
 - Q: What port should the backend use for local development? → A: Port 5000 - the standard ASP.NET Core development port. Frontend configured with `VITE_API_BASE_URL=http://localhost:5000` in development.
 - Q: What reverse proxy technology should be used for the production deployment? → A: Nginx - lightweight, fast, industry-standard for VPS deployments, integrates seamlessly with Certbot/Let's Encrypt, and provides simple configuration for frontend/backend routing.
-- Q: How should API endpoints be routed - prefix-based, subdomain-based, or other approach? → A: Single container approach - both frontend static files and backend API run in the same container. Nginx serves the container on port 443 (HTTPS). Simplifies deployment and eliminates routing complexity.
+- Q: How should API endpoints be routed - prefix-based, subdomain-based, or other approach? → A: Nginx reverse proxy on the host terminates TLS and routes `/` to the frontend container and `/api` to the .NET backend container. Keeps services independent while sharing the production domain.
+- Q: Should frontend and backend share one Dockerfile/image or be built independently? → A: Two Dockerfiles/images (frontend + backend) orchestrated together; Nginx proxies to each. Keeps build contexts clean and services independent.
+- Q: Should Nginx and certificate management run inside docker-compose or on the host? → A: Containerized Nginx reverse proxy with ACME/certbot companion under docker-compose for automated certificate issuance/renewal and volume-persisted certs.
+- Q: Under the containerized reverse proxy, should routing use path-based `/api` on a single domain or host-based subdomains? → A: Single domain with path-based `/api` routing managed by Nginx inside docker-compose.
+- Q: Where should certificates be stored within docker-compose? → A: `/etc/letsencrypt` in a named Docker volume shared between Nginx and the ACME companion.
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - System Administrator Deploys Application to VPS (Priority: P1)
 
-A system administrator needs to deploy the Trophy3D application to a VPS hosting environment. The application (frontend and backend running in the same container) is exposed through Nginx reverse proxy. The deployment must:
+A system administrator needs to deploy the Trophy3D application to a VPS hosting environment. The application (frontend and backend running in separate containers) is exposed through Nginx reverse proxy. The deployment must:
 - Listen for HTTPS traffic on port 443 via Nginx
 - Redirect HTTP traffic on port 80 to HTTPS
-- Serve frontend static assets and backend API endpoints from the same application container
+- Serve frontend from the frontend container and backend API endpoints from the backend container
 - Automatically maintain valid SSL/TLS certificates without manual intervention
 
 **Why this priority**: This is the foundational requirement for production deployment. Without HTTPS and proper port configuration, the application cannot securely serve users or meet modern security standards.
@@ -38,7 +42,7 @@ A system administrator needs to deploy the Trophy3D application to a VPS hosting
 1. **Given** the application is deployed on a VPS with a valid domain, **When** a user accesses the frontend via HTTPS, **Then** they receive the frontend application without security warnings
 2. **Given** a user accesses the application via HTTP on port 80, **When** they make a request, **Then** they are redirected to the HTTPS version
 3. **Given** an SSL certificate is 30 days from expiration, **When** the auto-renewal check runs, **Then** the certificate is successfully renewed without downtime
-4. **Given** both frontend and backend are running in the same container, **When** users access / they receive frontend assets and /api/* requests are routed to the backend, **Then** both respond over HTTPS on port 443
+4. **Given** frontend and backend run in separate containers behind Nginx, **When** users access / they receive frontend assets and /api/* requests are routed to the backend, **Then** both respond over HTTPS on port 443
 
 ---
 
@@ -105,8 +109,12 @@ Certbot must be installed and configured on the VPS to automatically renew Let's
 - **FR-008**: Certbot MUST automatically renew expiring Let's Encrypt certificates at least 30 days before expiration
 - **FR-009**: Upon successful certificate renewal, Nginx MUST reload the new certificate without interrupting active HTTPS connections
 - **FR-010**: Certificate files MUST be persisted in /etc/letsencrypt/live/ on the VPS host so they survive container restarts
-- **FR-011**: Application container MUST serve both frontend static assets (on /) and backend API endpoints (on /api/*)
-- **FR-012**: Nginx MUST route HTTPS traffic on port 443 to the application container; HTTP traffic on port 80 MUST be redirected to HTTPS
+- **FR-011**: Frontend container MUST serve the frontend application on `/` (via npm runtime or built static assets)
+- **FR-012**: Backend container MUST serve API endpoints on `/api/*`
+- **FR-013**: Nginx MUST route HTTPS traffic on port 443 to the frontend container for `/` and to the backend container for `/api/*`; HTTP traffic on port 80 MUST be redirected to HTTPS
+- **FR-014**: Reverse proxy and certificate management MUST run as docker-compose services (containerized Nginx + ACME/certbot companion)
+- **FR-015**: Certificates MUST persist via docker volumes and be automatically renewed without host-level schedulers
+- **FR-016**: A named volume MUST be mounted at `/etc/letsencrypt` for both the Nginx proxy and the ACME/certbot companion to share certificate files
 
 ### Key Entities
 
@@ -131,17 +139,17 @@ Certbot must be installed and configured on the VPS to automatically renew Let's
 
 1. **Domain Registration**: The domain giveyourcollagueatrophie.online is already registered and DNS is properly configured to point to the VPS IP address
 2. **Certificate Provider**: Let's Encrypt is used for SSL/TLS certificates; Certbot is the automation tool
-3. **Container Orchestration**: Docker is used for deployment; both frontend and backend run in the same application container
-4. **Reverse Proxy Architecture**: Nginx is installed on the VPS host (not in a container) to:
+3. **Container Orchestration**: Docker is used for deployment; frontend and backend run in separate containers orchestrated together (e.g., docker-compose)
+4. **Reverse Proxy Architecture**: Nginx runs as a container managed by docker-compose to:
    - Listen on ports 80 (HTTP) and 443 (HTTPS)
    - Redirect HTTP traffic to HTTPS
    - Terminate HTTPS connections
-   - Forward requests to the application container
-   - Reload certificates upon Certbot renewal
-5. **Certbot Installation**: Certbot is installed on the VPS host (not in a container) to manage Let's Encrypt certificates
-6. **Systemd or Cron**: VPS has either systemd timers or cron available to run daily Certbot renewal checks
+   - Forward `/` requests to the frontend container and `/api/*` requests to the backend container
+   - Reload certificates upon renewal (container reload)
+5. **Certificate Management**: ACME/certbot companion runs as a container alongside Nginx to manage Let's Encrypt certificates and automate issuance/renewal
+6. **Renewal Scheduling**: Renewal is handled by the ACME companion; no host-level systemd/cron is required
 7. **Environment Detection**: Vite build-time environment detection using `VITE_API_BASE_URL` variable determines whether code is running in production or development
 8. **Port Availability**: VPS allows inbound traffic on ports 80 and 443
 9. **Certificate Persistence**: /etc/letsencrypt/live/ directory is accessible on the VPS host and persists across container restarts; Nginx reads from this directory
-10. **Backend API Mounting**: The backend ASP.NET application is configured to serve both its API endpoints and the frontend static files (built React app) from the same process
-11. **Internal Container Port**: Application container listens on an internal port (e.g., 5000 or 8080); Nginx forwards traffic to this port
+10. **Backend API Mounting**: The backend ASP.NET application only serves API endpoints; frontend is served separately from the frontend container
+11. **Internal Container Ports**: Frontend and backend containers listen on their respective internal ports (e.g., 4173 for frontend preview/static server, 5000 for backend); Nginx forwards traffic to the appropriate port

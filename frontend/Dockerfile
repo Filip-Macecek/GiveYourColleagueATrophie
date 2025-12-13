@@ -23,6 +23,9 @@ RUN npm run build
 # Runtime stage - serve with nginx
 FROM nginx:alpine
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
 

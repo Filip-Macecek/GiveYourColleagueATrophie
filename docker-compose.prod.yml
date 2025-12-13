@@ -1,0 +1,111 @@
+version: "3.9"
+
+volumes:
+  letsencrypt:
+  certbot-challenges:
+
+networks:
+  app:
+    driver: bridge
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: trophy3d-backend:prod
+    container_name: trophy3d-backend-prod
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:5000
+    expose:
+      - "5000"
+    restart: unless-stopped
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:5000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://giveyourcollagueatrophie.online/api}
+    image: trophy3d-frontend:prod
+    container_name: trophy3d-frontend-prod
+    env_file:
+      - .env.production
+    expose:
+      - "3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: trophy3d-nginx
+    depends_on:
+      - backend
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
+      - letsencrypt:/etc/letsencrypt
+      - certbot-challenges:/var/www/certbot
+    networks:
+      - app
+    restart: unless-stopped
+
+  acme:
+    image: certbot/certbot:latest
+    container_name: trophy3d-acme
+    env_file:
+      - .env.production
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot-challenges:/var/www/certbot
+    depends_on:
+      - nginx
+    entrypoint: /bin/sh
+    command: >-
+      -c "
+      set -e;
+      DOMAIN=$${DOMAIN:-giveyourcollagueatrophie.online};
+      EMAIL=$${EMAIL:-admin@giveyourcollagueatrophie.online};
+      STAGING=$${STAGING:-false};
+      if [ \"$${STAGING}\" = \"true\" ]; then
+        CERTBOT_STAGING=--staging;
+      else
+        CERTBOT_STAGING="";
+      fi;
+      if [ -z \"$${DOMAIN}\" ] || [ -z \"$${EMAIL}\" ]; then
+        echo 'DOMAIN and EMAIL are required for certificate issuance';
+        exit 1;
+      fi;
+      if [ ! -f /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem ]; then
+        certbot certonly --webroot -w /var/www/certbot -d $${DOMAIN} --email $${EMAIL} --agree-tos --no-eff-email $CERTBOT_STAGING;
+        kill -s HUP 1 || true;
+      fi;
+      trap 'exit 0' TERM INT;
+      while :; do
+        certbot renew --webroot -w /var/www/certbot --deploy-hook \"kill -s HUP 1\" --quiet $CERTBOT_STAGING || true;
+        sleep 12h;
+      done
+      "
+    networks:
+      - app
+    pid: "service:nginx"
+    restart: unless-stopped

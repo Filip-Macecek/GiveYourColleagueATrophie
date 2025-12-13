@@ -38,6 +38,7 @@ Successfully implemented a complete session-based trophy-sharing application wit
 - Multi-stage builds for both backend and frontend
 - Nginx for frontend static asset serving
 - Environment configuration with .env files
+- Production reverse proxy and HTTPS: docker-compose.prod.yml with Nginx proxy, ACME companion, and letsencrypt volume
 
 ## Feature Implementation Details
 
@@ -190,6 +191,15 @@ Deferred items for future implementation:
 docker-compose up -d
 # Frontend: http://localhost:3000
 # API Docs: http://localhost:5000/swagger
+```
+
+### Production Deploy (HTTPS)
+```bash
+cp .env.prod.example .env.production   # set DOMAIN/EMAIL/VITE_API_BASE_URL
+docker compose -f docker-compose.prod.yml up -d --build
+curl -I https://giveyourcollagueatrophie.online   # expect 200 over TLS
+curl -I http://giveyourcollagueatrophie.online    # expect 301 redirect
+docker compose -f docker-compose.prod.yml logs -f acme   # monitor issuance/renewal
 ```
 
 ### Local Development
