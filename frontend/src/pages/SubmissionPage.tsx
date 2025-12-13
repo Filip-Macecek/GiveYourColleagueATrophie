@@ -5,10 +5,10 @@ import { TrophyForm } from '../components/TrophyForm'
 import { useTrophies } from '../hooks/useTrophies'
 import { useSession } from '../hooks/useSession'
 import { useInactivity } from '../hooks/useInactivity'
-import { useRelativeTime } from '../hooks/useRelativeTime'
 import { RefreshButton } from '../components/RefreshButton'
 import { PollingIndicator } from '../components/PollingIndicator'
 import { LastUpdated } from '../components/LastUpdated'
+import { PresentTrophiesButton } from '../components/PresentTrophiesButton'
 
 /**
  * SubmissionPage - Page for team members to submit trophies.
@@ -149,9 +149,7 @@ export function SubmissionPage() {
 
                 {/* Present Trophies Button (when 2+ trophies) */}
                 {trophies.length >= 2 && (
-                  <button onClick={handlePresentClick} className="btn-present-trophies">
-                    🎭 PRESENT TROPHIES! 🎭
-                  </button>
+                  <PresentTrophiesButton onClick={handlePresentClick} />
                 )}
               </div>
 

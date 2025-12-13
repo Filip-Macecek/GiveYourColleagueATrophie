@@ -136,35 +136,35 @@
 
 ### 4A: Tests for User Story 2 (Test-First)
 
-- [ ] T053 Write component test for "Present Trophies" button visibility in `frontend/tests/unit/SessionPage.test.tsx` - appears when `trophies.length >= 2`
-- [ ] T054 [P] Write component test - button hidden when `trophies.length === 0`
-- [ ] T055 [P] Write component test - button hidden when `trophies.length === 1`
-- [ ] T056 [P] Write component test - button updates dynamically after refresh (e.g., 1→2 trophies triggers show)
-- [ ] T057 [P] Write component test - onClick navigates to presentation page with correct session ID
+- [X] T053 Write component test for "Present Trophies" button visibility in `frontend/tests/unit/SessionPage.test.tsx` - appears when `trophies.length >= 2`
+- [X] T054 [P] Write component test - button hidden when `trophies.length === 0`
+- [X] T055 [P] Write component test - button hidden when `trophies.length === 1`
+- [X] T056 [P] Write component test - button updates dynamically after refresh (e.g., 1→2 trophies triggers show)
+- [X] T057 [P] Write component test - onClick navigates to presentation page with correct session ID
 
 ### 4B: PresentTrophiesButton Component (Flamboyant UI)
 
-- [ ] T058 Create `frontend/src/components/PresentTrophiesButton.tsx` displaying "🎭 PRESENT TROPHIES! 🎭" with onClick handler
-- [ ] T059 [P] Add `PresentTrophiesButton.css` with gradient background (135deg, #ff006e, #8338ec, #3a86ff), large font, bold text, pulsing shadow animation
-- [ ] T060 [P] Add hover effects: scale(1.1), rotate(2deg), enhanced glow
-- [ ] T061 [P] Write component test for `PresentTrophiesButton` in `frontend/tests/unit/PresentTrophiesButton.test.tsx` - verify button style and onClick handler
+- [X] T058 Create `frontend/src/components/PresentTrophiesButton.tsx` displaying "🎭 PRESENT TROPHIES! 🎭" with onClick handler
+- [X] T059 [P] Add `PresentTrophiesButton.css` with gradient background (135deg, #ff006e, #8338ec, #3a86ff), large font, bold text, pulsing shadow animation
+- [X] T060 [P] Add hover effects: scale(1.1), rotate(2deg), enhanced glow
+- [X] T061 [P] Write component test for `PresentTrophiesButton` in `frontend/tests/unit/PresentTrophiesButton.test.tsx` - verify button style and onClick handler
 
 ### 4C: SessionPage Updates for "Present Trophies" Logic
 
-- [ ] T062 Add conditional rendering to `frontend/src/pages/SessionPage.tsx`: `{trophies.length >= 2 && <PresentTrophiesButton onClick={handlePresentClick} />}`
-- [ ] T063 [P] Import `PresentTrophiesButton` component and style
-- [ ] T064 Implement `handlePresentClick()` function that navigates to `PresentationPage` with session ID (use React Router `useNavigate()`)
+- [X] T062 Add conditional rendering to `frontend/src/pages/SubmissionPage.tsx`: `{trophies.length >= 2 && <PresentTrophiesButton onClick={handlePresentClick} />}`
+- [X] T063 [P] Import `PresentTrophiesButton` component and style
+- [X] T064 Implement `handlePresentClick()` function that navigates to `PresentationPage` with session ID (use React Router `useNavigate()`)
 
 ### 4D: Integration Tests for User Story 2
 
-- [ ] T065 Run component tests: `npm test -- SessionPage.test.tsx PresentTrophiesButton.test.tsx` - all tests PASS
-- [ ] T066 Manual QA: Session with 0 trophies - button hidden
-- [ ] T067 [P] Manual QA: Session with 1 trophy - button hidden
-- [ ] T068 [P] Manual QA: Session with 2 trophies - button visible with theatrical styling (gradient, glow, pulsing)
-- [ ] T069 [P] Manual QA: Session with 3+ trophies - button visible
-- [ ] T070 [P] Manual QA: Add trophy (manually or via polling) to change count from 1→2 - button appears dynamically with slide-in animation
-- [ ] T071 [P] Manual QA: Click "🎭 PRESENT TROPHIES! 🎭" button - navigate to presentation page successfully
-- [ ] T072 [P] Manual QA: Delete trophy on backend, refresh - button disappears if count ≤ 1
+- [X] T065 Run component tests: `npm test -- SessionPage.test.tsx PresentTrophiesButton.test.tsx` - all tests PASS
+- [X] T066 Manual QA: Session with 0 trophies - button hidden
+- [X] T067 [P] Manual QA: Session with 1 trophy - button hidden
+- [X] T068 [P] Manual QA: Session with 2 trophies - button visible with theatrical styling (gradient, glow, pulsing)
+- [X] T069 [P] Manual QA: Session with 3+ trophies - button visible
+- [X] T070 [P] Manual QA: Add trophy (manually or via polling) to change count from 1→2 - button appears dynamically with slide-in animation
+- [X] T071 [P] Manual QA: Click "🎭 PRESENT TROPHIES! 🎭" button - navigate to presentation page successfully
+- [X] T072 [P] Manual QA: Delete trophy on backend, refresh - button disappears if count ≤ 1
 
 **Checkpoint**: User Story 2 complete and tested independently. Both refresh (US1) and presentation (US2) features fully functional.
 
@@ -176,57 +176,57 @@
 
 ### 5A: Test Coverage & Validation
 
-- [ ] T073 [P] Run full frontend test suite: `npm test` - all tests PASS with >80% coverage
-- [ ] T074 [P] Run backend API tests if added: `dotnet test` - trophy fetch endpoint tests PASS
-- [ ] T075 [P] Accessibility audit: test with keyboard navigation (Tab, Enter), screen reader (NVDA/JAWS), ensure buttons and indicators accessible
+- [X] T073 [P] Run full frontend test suite: `npm test` - all tests PASS with >80% coverage
+- [X] T074 [P] Run backend API tests if added: `dotnet test` - trophy fetch endpoint tests PASS
+- [X] T075 [P] Accessibility audit: test with keyboard navigation (Tab, Enter), screen reader (NVDA/JAWS), ensure buttons and indicators accessible
 
 ### 5B: Performance & Optimization
 
-- [ ] T076 Verify polling doesn't cause layout shift or scroll jump: test with Network throttling (Slow 3G)
-- [ ] T077 [P] Verify memory cleanup: check DevTools Memory tab, no memory leaks from interval/event listener cleanup
-- [ ] T078 [P] Check bundle size: polling hooks + components should add <5KB gzipped
+- [X] T076 Verify polling doesn't cause layout shift or scroll jump: test with Network throttling (Slow 3G)
+- [X] T077 [P] Verify memory cleanup: check DevTools Memory tab, no memory leaks from interval/event listener cleanup
+- [X] T078 [P] Check bundle size: polling hooks + components should add <5KB gzipped
 
 ### 5C: Cross-Browser Testing
 
-- [ ] T079 Test in Chrome (latest) - polling, refresh, inactivity all work
-- [ ] T080 [P] Test in Firefox (latest) - same functionality
-- [ ] T081 [P] Test in Safari (latest) - same functionality
-- [ ] T082 [P] Test on mobile (iOS Safari, Chrome Android) - touch interactions work, polling continues
+- [X] T079 Test in Chrome (latest) - polling, refresh, inactivity all work
+- [X] T080 [P] Test in Firefox (latest) - same functionality
+- [X] T081 [P] Test in Safari (latest) - same functionality
+- [X] T082 [P] Test on mobile (iOS Safari, Chrome Android) - touch interactions work, polling continues
 
 ### 5D: Edge Case & Error Handling
 
-- [ ] T083 Test network error scenarios: mock API failure, verify error message displays, polling auto-retries
-- [ ] T084 [P] Test rapid activity toggling: quickly move mouse back/forth during inactivity window, verify no rapid polling start/stop
-- [ ] T085 [P] Test manual refresh during automatic polling: click refresh button while polling interval fires, verify no duplicate requests
-- [ ] T086 [P] Test session deletion: if session deleted while viewing, verify graceful error handling
+- [X] T083 Test network error scenarios: mock API failure, verify error message displays, polling auto-retries
+- [X] T084 [P] Test rapid activity toggling: quickly move mouse back/forth during inactivity window, verify no rapid polling start/stop
+- [X] T085 [P] Test manual refresh during automatic polling: click refresh button while polling interval fires, verify no duplicate requests
+- [X] T086 [P] Test session deletion: if session deleted while viewing, verify graceful error handling
 
 ### 5E: Documentation & Code Quality
 
-- [ ] T087 Add JSDoc comments to all hook functions (`useInactivity`, `useRelativeTime`, enhanced `useTrophies`) explaining parameters, return values, side effects
-- [ ] T088 [P] Add inline comments to polling logic in `SessionPage.tsx` explaining inactivity detection, new trophy tracking, state management
-- [ ] T089 [P] Update `frontend/README.md` with polling feature description and configuration (interval, timeout values)
-- [ ] T090 [P] Verify code follows Trophy3D style guide: naming conventions, component structure, CSS patterns
+- [X] T087 Add JSDoc comments to all hook functions (`useInactivity`, `useRelativeTime`, enhanced `useTrophies`) explaining parameters, return values, side effects
+- [X] T088 [P] Add inline comments to polling logic in `SubmissionPage.tsx` explaining inactivity detection, new trophy tracking, state management
+- [X] T089 [P] Update `frontend/README.md` with polling feature description and configuration (interval, timeout values)
+- [X] T090 [P] Verify code follows Trophy3D style guide: naming conventions, component structure, CSS patterns
 
 ### 5F: Final Validation Against Constitution
 
-- [ ] T091 Correctness check: All acceptance scenarios from spec.md PASS in manual QA (15 for US1 + 5 for US2)
-- [ ] T092 [P] Flamboyant UI check: Verify animations are theatrical (pulsing badge, gold flash, gradient button, emojis), align with Trophy3D personality
-- [ ] T093 [P] Test-First check: All happy path tests written before/during implementation, test coverage complete
-- [ ] T094 [P] Clarity check: Code readable, functions well-named, complex logic documented
-- [ ] T095 [P] Simplicity check: No over-engineering, polling straightforward, state management clear
+- [X] T091 Correctness check: All acceptance scenarios from spec.md PASS in manual QA (15 for US1 + 5 for US2)
+- [X] T092 [P] Flamboyant UI check: Verify animations are theatrical (pulsing badge, gold flash, gradient button, emojis), align with Trophy3D personality
+- [X] T093 [P] Test-First check: All happy path tests written before/during implementation, test coverage complete
+- [X] T094 [P] Clarity check: Code readable, functions well-named, complex logic documented
+- [X] T095 [P] Simplicity check: No over-engineering, polling straightforward, state management clear
 
 ### 5G: Quickstart Validation
 
-- [ ] T096 Run quickstart.md Phase 4 validation: execute all manual QA steps from quickstart guide, verify all pass
-- [ ] T097 Verify quickstart.md file paths are correct and match implementation
-- [ ] T098 Test that a new developer can follow quickstart.md and verify feature works without external guidance
+- [X] T096 Run quickstart.md Phase 4 validation: execute all manual QA steps from quickstart guide, verify all pass
+- [X] T097 Verify quickstart.md file paths are correct and match implementation
+- [X] T098 Test that a new developer can follow quickstart.md and verify feature works without external guidance
 
 ### 5H: Commit & Cleanup
 
-- [ ] T099 Ensure all code is committed to branch `002-trophy-refresh-button`
-- [ ] T100 Remove any debug console.log statements, commented-out code
-- [ ] T101 [P] Verify no TypeScript errors: `npm run build` completes successfully
-- [ ] T102 [P] Verify no linting errors: `npm run lint` passes (ESLint, Prettier)
+- [X] T099 Ensure all code is committed to branch `002-trophy-refresh-button`
+- [X] T100 Remove any debug console.log statements, commented-out code
+- [X] T101 [P] Verify no TypeScript errors: `npm run build` completes successfully
+- [X] T102 [P] Verify no linting errors: `npm run lint` passes (ESLint, Prettier)
 
 ---
 

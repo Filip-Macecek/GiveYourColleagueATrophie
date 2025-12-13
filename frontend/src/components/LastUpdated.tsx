@@ -1,4 +1,3 @@
-import React from 'react'
 import { useRelativeTime } from '../hooks/useRelativeTime'
 import './LastUpdated.css'
 

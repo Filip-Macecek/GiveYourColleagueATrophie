@@ -20,7 +20,7 @@ export function useInactivity(timeout: number = 300000): boolean {
   const [isInactive, setIsInactive] = useState(false)
 
   useEffect(() => {
-    let inactivityTimer: NodeJS.Timeout
+    let inactivityTimer: ReturnType<typeof setTimeout>
 
     /**
      * Reset the inactivity timer and mark user as active.
