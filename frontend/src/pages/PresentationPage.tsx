@@ -6,17 +6,24 @@ import { useTrophies } from '../hooks/useTrophies'
 import { useSession } from '../hooks/useSession'
 
 /**
- * PresentationPage - Page for presenting 3D trophies.
+ * PresentationPage - Page for presenting trophies with next navigation.
+ * Features:
+ * - Loads all trophies for the session
+ * - Displays trophies one at a time
+ * - Next Trophy button to advance through trophies
+ * - Confetti resets for each new trophy
+ * - Disabled state when reaching final trophy
  */
 export function PresentationPage() {
   const { sessionCode } = useParams<{ sessionCode: string }>()
-  const { getTrophy } = useTrophies()
+  const { trophies, loading: trophiesLoading, listTrophies } = useTrophies()
   const { startPresentation } = useSession()
-  const [currentTrophy, setCurrentTrophy] = useState<any>(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isFinished, setIsFinished] = useState(false)
 
+  // Initialize presentation and load trophies
   useEffect(() => {
     const initializePresentation = async () => {
       if (!sessionCode) return
@@ -25,11 +32,8 @@ export function PresentationPage() {
         // Start presentation mode
         await startPresentation(sessionCode)
 
-        // Get the first trophy
-        // In a real app, we'd get a list of trophies first
-        // For now, we'll load the first one by getting it directly
-        const firstTrophy = await getTrophy(sessionCode, '')
-        setCurrentTrophy(firstTrophy)
+        // Load all trophies for the session
+        await listTrophies(sessionCode)
       } catch (err: any) {
         setError(err.response?.data?.message || 'Failed to load presentation')
       } finally {
@@ -38,22 +42,21 @@ export function PresentationPage() {
     }
 
     initializePresentation()
-  }, [sessionCode, startPresentation, getTrophy])
+  }, [sessionCode, startPresentation, listTrophies])
 
-  const handleNext = async () => {
-    if (!currentTrophy?.nextTrophyId || !sessionCode) return
+  const currentTrophy = trophies[currentIndex]
+  const isLastTrophy = currentIndex === trophies.length - 1
+  const hasNextTrophy = currentIndex < trophies.length - 1
 
-    try {
-      const nextTrophy = await getTrophy(sessionCode, currentTrophy.nextTrophyId)
-      setCurrentTrophy(nextTrophy)
-
-      if (nextTrophy.isLastTrophy) {
-        // Show finished message after a delay
-        setTimeout(() => setIsFinished(true), 2000)
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load next trophy')
+  const handleNext = () => {
+    if (!hasNextTrophy) {
+      // Show finished message
+      setIsFinished(true)
+      return
     }
+
+    // Advance to next trophy
+    setCurrentIndex((prev) => prev + 1)
   }
 
   if (loading) {
@@ -88,10 +91,26 @@ export function PresentationPage() {
         <div className="container">
           <div className="finished-screen">
             <div className="finished-animation">🏆</div>
-            <h1>That is all.</h1>
+            <h1>That's all!</h1>
             <p className="finished-message">Thank you to everyone who participated!</p>
             <a href="/" className="btn-primary">
               Create Another Session
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (trophies.length === 0) {
+    return (
+      <div className="presentation-page">
+        <div className="container">
+          <div className="error-container">
+            <h2>No Trophies</h2>
+            <p>This session doesn't have any trophies yet.</p>
+            <a href="/" className="btn-primary">
+              ← Back Home
             </a>
           </div>
         </div>
@@ -105,19 +124,23 @@ export function PresentationPage() {
         <div className="presentation-content">
           {currentTrophy && (
             <>
-              <TrophyPresentation trophy={currentTrophy} />
+              <TrophyPresentation trophy={currentTrophy} key={currentTrophy.id} />
 
               <div className="navigation">
-                {!currentTrophy.isLastTrophy && (
-                  <button onClick={handleNext} className="btn-next">
-                    → Next Trophy
-                  </button>
-                )}
+                <button 
+                  onClick={handleNext} 
+                  className="btn-next"
+                  disabled={!hasNextTrophy}
+                >
+                  {hasNextTrophy ? '→ Next Trophy' : '✓ Finished'}
+                </button>
+                {trophiesLoading && <span className="loading-indicator">Loading...</span>}
               </div>
 
               <div className="trophy-counter">
-                Trophy {currentTrophy.displayOrder}
-                {!currentTrophy.isLastTrophy && <span> • More to come →</span>}
+                Trophy {currentIndex + 1} of {trophies.length}
+                {hasNextTrophy && <span> • More to come →</span>}
+                {isLastTrophy && <span> • Last one!</span>}
               </div>
             </>
           )}

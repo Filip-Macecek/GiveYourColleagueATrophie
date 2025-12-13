@@ -43,16 +43,23 @@
 
 .trophy-icon {
   font-size: 120px;
-  animation: spin 3s linear infinite;
+  animation: spin-trophy 8s linear infinite;
   text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
 }
 
-@keyframes spin {
+@keyframes spin-trophy {
   from {
     transform: rotateY(0deg);
   }
   to {
     transform: rotateY(360deg);
+  }
+}
+
+/* Disable spin animation for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .trophy-icon {
+    animation: none;
   }
 }
 
@@ -64,14 +71,15 @@
 
 .trophy-overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 30px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  max-width: 90%;
   color: white;
   text-align: center;
   animation: slideUp 0.5s ease-out;
+  pointer-events: none;
 }
 
 @keyframes slideUp {
@@ -86,18 +94,36 @@
 }
 
 .recipient-name {
-  font-size: 32px;
-  margin: 0 0 12px 0;
+  font-size: 28px;
+  margin: 0 0 8px 0;
   font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.7);
   letter-spacing: 1px;
+  color: #FFD700;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .achievement-text {
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.4;
   margin: 0 0 12px 0;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.7);
+  color: #FFFFFF;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.giver-info {
+  font-size: 14px;
+  margin: 0;
+  opacity: 0.9;
+  font-style: italic;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+  color: #E0E0E0;
 }
 
 .submitter-info {

@@ -43,6 +43,34 @@
   transform: scale(1.05);
 }
 
+.btn-next:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-next:disabled:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: none;
+}
+
+.loading-indicator {
+  display: inline-block;
+  margin-left: 12px;
+  font-size: 14px;
+  opacity: 0.8;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .trophy-counter {
   margin-top: 30px;
   font-size: 16px;

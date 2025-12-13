@@ -6,7 +6,11 @@ A session-based trophy-sharing application enabling team members to nominate col
 
 - **Create Sessions**: Organizers can create a sharing session and receive a shareable link
 - **Submit Nominations**: Team members can submit trophy nominations with recipient name and achievement
-- **Present with 3D**: Organizers can present trophies with theatrical 3D rendered graphics
+- **Present with Rizz**: Organizers can present trophies with celebratory confetti, 2D spinning animations, and next trophy navigation
+  - 🎉 Confetti burst when trophy enters viewport
+  - 🏆 8-second spinning trophy with text overlays
+  - ➡️ Navigate through multiple trophies
+  - ♿ Respects accessibility preferences (reduced motion)
 
 ## Quick Start
 

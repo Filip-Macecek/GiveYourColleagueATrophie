@@ -1,0 +1,65 @@
+openapi: 3.0.3
+info:
+  title: Trophy Presentation API Contracts
+  version: 1.0.0
+paths:
+  /sessions/{sessionId}/trophies:
+    get:
+      summary: List trophies for a presentation session
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrophyPresentation'
+  /sessions/{sessionId}/trophies/{trophyId}:
+    get:
+      summary: Get a specific trophy presentation
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: trophyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrophyPresentation'
+components:
+  schemas:
+    TrophyPresentation:
+      type: object
+      required: [receiverName, achievementTitle]
+      properties:
+        receiverName:
+          type: string
+          maxLength: 60
+        achievementTitle:
+          type: string
+          maxLength: 60
+        giverName:
+          type: string
+          maxLength: 60
+        sessionId:
+          type: string
+        trophyId:
+          type: string
+        displayOrder:
+          type: integer

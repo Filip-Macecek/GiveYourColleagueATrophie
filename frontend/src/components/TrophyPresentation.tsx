@@ -1,4 +1,7 @@
+import { useEffect } from 'react'
 import './TrophyPresentation.css'
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver'
+import { useConfetti } from '../hooks/useConfetti'
 
 interface Trophy {
   id: string
@@ -13,26 +16,49 @@ interface TrophyPresentationProps {
 }
 
 /**
- * TrophyPresentation - Component for displaying trophy details.
- * Currently shows text-based trophy. In the future, this will integrate three.js for 3D rendering.
+ * TrophyPresentation - Component for displaying trophy details with confetti animation.
+ * Features:
+ * - Triggers confetti when trophy enters viewport (50% visible)
+ * - Respects 30-second throttle per trophy
+ * - Honors prefers-reduced-motion accessibility preference
+ * - Displays 2D spinning trophy with 8-second rotation
+ * - Overlays receiver name and achievement text
+ * - Shows giver name with "From:" label
+ * - Applies defaults: receiverName="Recipient", achievementTitle="Achievement", giverName="Anonymous"
  */
 export function TrophyPresentation({ trophy }: TrophyPresentationProps) {
+  const { ref, isIntersecting } = useIntersectionObserver({ threshold: 0.5 })
+  const { fireConfetti } = useConfetti()
+
+  // Apply default values
+  const receiverName = trophy.recipientName?.trim() || 'Recipient'
+  const achievementTitle = trophy.achievementText?.trim() || 'Achievement'
+  const giverName = trophy.submitterName?.trim() || 'Anonymous'
+
+  // Trigger confetti when trophy enters viewport
+  useEffect(() => {
+    if (isIntersecting) {
+      fireConfetti(trophy.id)
+    }
+  }, [isIntersecting, trophy.id, fireConfetti])
+
   return (
-    <div className="trophy-presentation">
+    <div 
+      className="trophy-presentation" 
+      ref={ref as any}
+      role="figure"
+      aria-label={`Trophy for ${receiverName}: ${achievementTitle}. From: ${giverName}`}
+    >
       <div className="trophy-visual">
-        {/* Placeholder for 3D model - will be implemented with three.js */}
         <div className="trophy-3d-placeholder">
-          <div className="trophy-icon">🏆</div>
-          <p className="placeholder-text">3D Trophy Model</p>
+          <div className="trophy-icon" aria-hidden="true">🏆</div>
         </div>
       </div>
 
       <div className="trophy-overlay">
-        <h2 className="recipient-name">{trophy.recipientName}</h2>
-        <p className="achievement-text">{trophy.achievementText}</p>
-        {trophy.submitterName && (
-          <p className="submitter-info">- {trophy.submitterName}</p>
-        )}
+        <h2 className="recipient-name">{receiverName}</h2>
+        <p className="achievement-text">{achievementTitle}</p>
+        <p className="giver-info">From: {giverName}</p>
       </div>
     </div>
   )
