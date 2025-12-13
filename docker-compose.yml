@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: trophy3d-backend
+    ports:
+      - "5000:5000"
+    environment:
+      ASPNETCORE_URLS: "http://+:5000"
+      ASPNETCORE_ENVIRONMENT: "Development"
+    networks:
+      - trophy3d-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: trophy3d-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      VITE_API_BASE_URL: "http://localhost:5000/api"
+    networks:
+      - trophy3d-network
+
+networks:
+  trophy3d-network:
+    driver: bridge

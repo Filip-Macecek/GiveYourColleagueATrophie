@@ -1,0 +1,449 @@
+openapi: 3.0.0
+info:
+  title: Trophy3D Sharing API
+  description: Session-based trophy sharing and presentation API
+  version: 1.0.0
+  contact:
+    name: Trophy3D Team
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local development
+  - url: https://api.trophy3d.app/api
+    description: Production
+
+paths:
+  /sessions:
+    post:
+      summary: Create a new trophy-sharing session
+      description: |
+        Organizer creates a session and receives a shareable URL.
+        Implements: FR-001, FR-002, FR-003
+      operationId: createSession
+      tags:
+        - Sessions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organizerName:
+                  type: string
+                  maxLength: 100
+                  description: Optional name of organizer
+                  example: "Alice"
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /sessions/{sessionCode}:
+    get:
+      summary: Retrieve session details and trophy list
+      description: |
+        Fetch session by shareable code. Used by organizer and participants.
+        Implements: FR-004, FR-005
+      operationId: getSession
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionCode
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 8
+          description: Session code (e.g., 'TROPHY-ABC123')
+          example: "TROPHY-ABC123"
+      responses:
+        '200':
+          description: Session and trophies retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionWithTrophiesResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '410':
+          description: Session has expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /sessions/{sessionCode}/trophies:
+    post:
+      summary: Submit a trophy nomination
+      description: |
+        Team member submits a trophy nomination with recipient name and achievement text.
+        Implements: FR-006, FR-007, FR-008, FR-009, FR-010
+      operationId: submitTrophy
+      tags:
+        - Trophies
+      parameters:
+        - name: sessionCode
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 8
+          example: "TROPHY-ABC123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrophySubmissionRequest'
+      responses:
+        '201':
+          description: Trophy submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrophySubmissionResponse'
+        '400':
+          description: Validation failed (missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Session not in submission mode (already presenting or closed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    get:
+      summary: List all trophies in a session
+      description: Fetch all trophy submissions for a session, ordered by display order
+      operationId: listTrophies
+      tags:
+        - Trophies
+      parameters:
+        - name: sessionCode
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "TROPHY-ABC123"
+      responses:
+        '200':
+          description: List of trophies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrophySubmissionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /sessions/{sessionCode}/trophies/{trophyId}:
+    get:
+      summary: Retrieve a single trophy
+      description: Fetch a specific trophy by ID (used during presentation)
+      operationId: getTrophy
+      tags:
+        - Trophies
+      parameters:
+        - name: sessionCode
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "TROPHY-ABC123"
+        - name: trophyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Trophy details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrophyDetailsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /sessions/{sessionCode}/present:
+    post:
+      summary: Transition session to presentation mode
+      description: |
+        Organizer initiates presentation. Session must have at least one trophy.
+        Implements: FR-011
+      operationId: startPresentation
+      tags:
+        - Presentation
+      parameters:
+        - name: sessionCode
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "TROPHY-ABC123"
+      responses:
+        '200':
+          description: Presentation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '400':
+          description: Cannot present (no trophies submitted)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Session already in presentation mode
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /sessions/{sessionCode}/close:
+    post:
+      summary: Close a session
+      description: Organizer explicitly closes a session (moves to CLOSED state)
+      operationId: closeSession
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionCode
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "TROPHY-ABC123"
+      responses:
+        '200':
+          description: Session closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+components:
+  schemas:
+    SessionResponse:
+      type: object
+      required:
+        - id
+        - sessionCode
+        - shareableUrl
+        - status
+        - createdAt
+        - expiresAt
+        - trophyCount
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        sessionCode:
+          type: string
+          maxLength: 8
+          example: "TROPHY-ABC123"
+        shareableUrl:
+          type: string
+          format: uri
+          example: "https://trophy3d.app/share/TROPHY-ABC123"
+        status:
+          type: string
+          enum: [CREATED, COLLECTING, PRESENTING, CLOSED]
+          example: COLLECTING
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-12-13T10:30:00Z"
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2025-12-14T10:30:00Z"
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+        trophyCount:
+          type: integer
+          minimum: 0
+          example: 3
+        organizerName:
+          type: string
+          nullable: true
+          example: "Alice"
+
+    SessionWithTrophiesResponse:
+      allOf:
+        - $ref: '#/components/schemas/SessionResponse'
+        - type: object
+          properties:
+            trophies:
+              type: array
+              items:
+                $ref: '#/components/schemas/TrophySubmissionResponse'
+
+    TrophySubmissionRequest:
+      type: object
+      required:
+        - recipientName
+        - achievementText
+      properties:
+        recipientName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Name of person being honored
+          example: "Bob Smith"
+        achievementText:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Achievement or reason for nomination
+          example: "Led the Q4 project to successful delivery on schedule"
+        submitterName:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: Optional name of person submitting
+          example: "Carol Jones"
+
+    TrophySubmissionResponse:
+      type: object
+      required:
+        - id
+        - sessionId
+        - recipientName
+        - achievementText
+        - submittedAt
+        - displayOrder
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "660e8400-e29b-41d4-a716-446655440000"
+        sessionId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        recipientName:
+          type: string
+          example: "Bob Smith"
+        achievementText:
+          type: string
+          example: "Led the Q4 project to successful delivery on schedule"
+        submitterName:
+          type: string
+          nullable: true
+          example: "Carol Jones"
+        submittedAt:
+          type: string
+          format: date-time
+          example: "2025-12-13T10:35:00Z"
+        displayOrder:
+          type: integer
+          minimum: 1
+          example: 1
+
+    TrophyDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/TrophySubmissionResponse'
+        - type: object
+          properties:
+            nextTrophyId:
+              type: string
+              format: uuid
+              nullable: true
+              description: ID of next trophy in presentation order
+              example: "660e8400-e29b-41d4-a716-446655440001"
+            isLastTrophy:
+              type: boolean
+              description: True if this is the last trophy
+              example: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: "SessionNotFound"
+        message:
+          type: string
+          example: "Session not found: INVALID-CODE"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-12-13T10:35:00Z"
+
+    ValidationErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+              example:
+                recipientName: ["This field is required"]
+                achievementText: ["This field is required", "Maximum length is 500"]
+
+  responses:
+    BadRequest:
+      description: Bad request (validation error)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,53 @@
+# Build and test directories
+dist/
+build/
+coverage/
+node_modules/
+.nyc_output/
+
+# Development files
+src/
+tests/
+*.ts
+tsconfig.json
+vite.config.ts
+vitest.config.ts
+jest.config.js
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+docs/
+README.md
+CONTRIBUTING.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Specs
+specs/
+.github/
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml

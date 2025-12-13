@@ -1,0 +1,153 @@
+.submission-page {
+  padding: 40px 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.submission-page .container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.submission-page h1 {
+  font-size: 42px;
+  margin-bottom: 20px;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.session-info {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.submission-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.form-section {
+  background: white;
+  color: #333;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  height: fit-content;
+}
+
+.form-section h2 {
+  margin-bottom: 20px;
+  color: #f5576c;
+  font-size: 24px;
+}
+
+.trophies-list {
+  background: white;
+  color: #333;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.trophies-list h2 {
+  margin-bottom: 20px;
+  color: #f5576c;
+  font-size: 24px;
+}
+
+.trophy-items {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.trophy-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #f5576c;
+  animation: slideIn 0.3s ease-out;
+}
+
+.trophy-number {
+  min-width: 40px;
+  height: 40px;
+  background: #f5576c;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.trophy-content h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.trophy-content p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.trophy-content .submitter {
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+.error-container {
+  background: white;
+  color: #333;
+  padding: 40px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 500px;
+  margin: 60px auto;
+}
+
+.error-container h2 {
+  margin-bottom: 20px;
+  color: #dc3545;
+}
+
+.loading {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 40px;
+  border-radius: 8px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .submission-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .trophy-items {
+    max-height: none;
+  }
+
+  .submission-page h1 {
+    font-size: 32px;
+  }
+}

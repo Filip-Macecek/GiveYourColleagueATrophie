@@ -1,0 +1,50 @@
+# Node modules and package management
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Development files
+src/
+*.ts
+tsconfig.json
+vite.config.ts
+
+# Tests
+tests/
+coverage/
+.nyc_output/
+
+# Development dependencies
+.vscode/
+.idea/
+
+# Environment files
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Source control
+.git/
+.gitignore
+
+# Documentation
+README.md
+docs/
+specs/
+.github/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
