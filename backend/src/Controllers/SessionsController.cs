@@ -1,6 +1,7 @@
 namespace Trophy3D.Api.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Trophy3D.Api.Models;
 using Trophy3D.Api.Services;
 
@@ -31,8 +32,6 @@ public class SessionsController : ControllerBase
     /// <param name="request">The session creation request.</param>
     /// <returns>The created session response.</returns>
     [HttpPost]
-    [ProduceResponseType(StatusCodes.Status201Created)]
-    [ProduceResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<SessionResponse>> CreateSession([FromBody] CreateSessionRequest? request = null)
     {
         try
@@ -53,9 +52,6 @@ public class SessionsController : ControllerBase
     /// <param name="sessionCode">The session code.</param>
     /// <returns>The session with trophies.</returns>
     [HttpGet("{sessionCode}")]
-    [ProduceResponseType(StatusCodes.Status200OK)]
-    [ProduceResponseType(StatusCodes.Status404NotFound)]
-    [ProduceResponseType(StatusCodes.Status410Gone)]
     public async Task<ActionResult<SessionWithTrophiesResponse>> GetSession(string sessionCode)
     {
         try
@@ -84,9 +80,6 @@ public class SessionsController : ControllerBase
     /// <param name="sessionCode">The session code.</param>
     /// <returns>The updated session response.</returns>
     [HttpPost("{sessionCode}/present")]
-    [ProduceResponseType(StatusCodes.Status200OK)]
-    [ProduceResponseType(StatusCodes.Status404NotFound)]
-    [ProduceResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<SessionResponse>> StartPresentation(string sessionCode)
     {
         try
@@ -115,8 +108,6 @@ public class SessionsController : ControllerBase
     /// <param name="sessionCode">The session code.</param>
     /// <returns>The closed session response.</returns>
     [HttpPost("{sessionCode}/close")]
-    [ProduceResponseType(StatusCodes.Status200OK)]
-    [ProduceResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<SessionResponse>> CloseSession(string sessionCode)
     {
         try

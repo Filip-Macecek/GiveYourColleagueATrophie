@@ -1,6 +1,7 @@
 namespace Trophy3D.Api.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Trophy3D.Api.Models;
 using Trophy3D.Api.Services;
 
@@ -32,10 +33,6 @@ public class TrophiesController : ControllerBase
     /// <param name="request">The trophy submission request.</param>
     /// <returns>The submitted trophy response.</returns>
     [HttpPost]
-    [ProduceResponseType(StatusCodes.Status201Created)]
-    [ProduceResponseType(StatusCodes.Status400BadRequest)]
-    [ProduceResponseType(StatusCodes.Status404NotFound)]
-    [ProduceResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<TrophySubmissionResponse>> SubmitTrophy(string sessionCode, [FromBody] TrophySubmissionRequest request)
     {
         try
@@ -74,8 +71,6 @@ public class TrophiesController : ControllerBase
     /// <param name="sessionCode">The session code.</param>
     /// <returns>List of trophy submissions.</returns>
     [HttpGet]
-    [ProduceResponseType(StatusCodes.Status200OK)]
-    [ProduceResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<List<TrophySubmissionResponse>>> ListTrophies(string sessionCode)
     {
         try
@@ -101,8 +96,6 @@ public class TrophiesController : ControllerBase
     /// <param name="trophyId">The trophy ID.</param>
     /// <returns>The trophy details.</returns>
     [HttpGet("{trophyId}")]
-    [ProduceResponseType(StatusCodes.Status200OK)]
-    [ProduceResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<TrophyDetailsResponse>> GetTrophy(string sessionCode, Guid trophyId)
     {
         try

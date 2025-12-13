@@ -2,8 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Trophy3D.Api.Data;
 using Trophy3D.Api.Filters;
+using Trophy3D.Api.Services;
 
-var builder = WebApplicationBuilder.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()

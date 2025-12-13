@@ -15,7 +15,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
     "axios": "^1.6.0",
-    "three": "^r128",
+    "three": "^0.159.0",
     "@react-three/fiber": "^8.15.0",
     "@react-three/drei": "^9.88.0"
   },

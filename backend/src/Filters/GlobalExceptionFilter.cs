@@ -1,6 +1,7 @@
 namespace Trophy3D.Api.Filters;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Trophy3D.Api.Models;
 
 /// <summary>

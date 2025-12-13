@@ -12,7 +12,7 @@ RUN if [ -f package-lock.json ]; then npm ci; elif [ -f yarn.lock ]; then yarn i
 # Copy source
 COPY frontend/src ./src
 COPY frontend/public ./public
-COPY frontend/tsconfig.json frontend/vite.config.ts ./
+COPY frontend/tsconfig.json frontend/tsconfig.node.json frontend/vite.config.ts frontend/vitest.config.ts ./
 COPY frontend/index.html ./
 
 # Build application
