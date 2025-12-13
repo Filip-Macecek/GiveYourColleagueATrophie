@@ -16,7 +16,7 @@ COPY backend/src ./src
 RUN dotnet build -c Release -o /app/build
 
 # Publish stage
-FROM mcr.microsoft.com/dotnet/runtime:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
 WORKDIR /app
 
