@@ -3,6 +3,7 @@ version: "3.9"
 volumes:
   letsencrypt:
   certbot-challenges:
+  nginx-run:
 
 networks:
   app:
@@ -65,6 +66,7 @@ services:
       - ./nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
       - letsencrypt:/etc/letsencrypt
       - certbot-challenges:/var/www/certbot
+      - nginx-run:/var/run
     networks:
       - app
     restart: unless-stopped
@@ -77,6 +79,7 @@ services:
     volumes:
       - letsencrypt:/etc/letsencrypt
       - certbot-challenges:/var/www/certbot
+      - nginx-run:/var/run
     depends_on:
       - nginx
     entrypoint: /bin/sh
@@ -97,15 +100,14 @@ services:
       fi;
       if [ ! -f /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem ]; then
         certbot certonly --webroot -w /var/www/certbot -d $${DOMAIN} --email $${EMAIL} --agree-tos --no-eff-email $CERTBOT_STAGING;
-        kill -s HUP 1 || true;
+        if [ -f /var/run/nginx.pid ]; then kill -s HUP $(cat /var/run/nginx.pid) || true; fi;
       fi;
       trap 'exit 0' TERM INT;
       while :; do
-        certbot renew --webroot -w /var/www/certbot --deploy-hook \"kill -s HUP 1\" --quiet $CERTBOT_STAGING || true;
+        certbot renew --webroot -w /var/www/certbot --deploy-hook "if [ -f /var/run/nginx.pid ]; then kill -s HUP $(cat /var/run/nginx.pid) || true; fi" --quiet $CERTBOT_STAGING || true;
         sleep 12h;
       done
       "
     networks:
       - app
-    pid: "service:nginx"
     restart: unless-stopped
