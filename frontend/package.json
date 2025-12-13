@@ -11,24 +11,26 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@react-three/drei": "^9.88.0",
+    "@react-three/fiber": "^8.15.0",
+    "axios": "^1.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
-    "axios": "^1.6.0",
-    "three": "^0.159.0",
-    "@react-three/fiber": "^8.15.0",
-    "@react-three/drei": "^9.88.0"
+    "three": "^0.159.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react": "^4.2.0",
+    "@vitest/ui": "^1.0.4",
+    "css": "^3.0.0",
+    "jsdom": "^27.3.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.7",
-    "vitest": "^1.0.4",
-    "@vitest/ui": "^1.0.4",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/jest-dom": "^6.1.5",
-    "css": "^3.0.0"
+    "vitest": "^1.0.4"
   }
 }

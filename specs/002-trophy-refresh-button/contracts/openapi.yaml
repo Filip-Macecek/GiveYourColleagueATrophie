@@ -1,0 +1,256 @@
+openapi: 3.0.3
+info:
+  title: Trophy3D API - Trophy Refresh Feature
+  description: |
+    API contract for trophy refresh and presentation controls feature.
+    Extends existing Trophy3D API with endpoints for fetching session trophies.
+  version: 1.0.0
+  contact:
+    name: Trophy3D Team
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local development server
+  - url: https://trophy3d.example.com/api
+    description: Production server
+
+paths:
+  /sessions/{sessionId}/trophies:
+    get:
+      summary: Get all trophies in a session
+      description: |
+        Retrieves all trophy submissions for a specific session. 
+        This endpoint is called by the manual refresh button and automatic polling mechanism.
+        Returns trophies in chronological order (oldest first).
+      operationId: getTrophiesBySession
+      tags:
+        - Trophies
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the session
+          schema:
+            type: string
+            format: uuid
+          example: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+      responses:
+        '200':
+          description: Successfully retrieved trophies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+                    format: uuid
+                    description: ID of the session
+                    example: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+                  trophies:
+                    type: array
+                    description: List of trophy submissions in the session
+                    items:
+                      $ref: '#/components/schemas/Trophy'
+                  count:
+                    type: integer
+                    description: Total number of trophies in the session
+                    example: 3
+              examples:
+                multipleTrophies:
+                  summary: Session with multiple trophies
+                  value:
+                    sessionId: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+                    count: 3
+                    trophies:
+                      - id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                        sessionId: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+                        userName: "Alice"
+                        modelData: "data:model/gltf-binary;base64,Z2xURg..."
+                        submittedAt: "2025-12-13T10:30:00Z"
+                      - id: "c9b8f12a-1234-5678-9abc-def012345678"
+                        sessionId: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+                        userName: "Bob"
+                        modelData: "data:model/gltf-binary;base64,Z2xURg..."
+                        submittedAt: "2025-12-13T10:35:00Z"
+                      - id: "d1e2f3a4-5678-9abc-def0-123456789abc"
+                        sessionId: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+                        userName: "Charlie"
+                        modelData: "data:model/gltf-binary;base64,Z2xURg..."
+                        submittedAt: "2025-12-13T10:40:00Z"
+                noTrophies:
+                  summary: Session with no trophies
+                  value:
+                    sessionId: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+                    count: 0
+                    trophies: []
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Session not found"
+                message: "No session found with ID a3bb189e-8bf9-3888-9912-ace4e6543002"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "Internal server error"
+                message: "An unexpected error occurred while fetching trophies"
+
+  /sessions/{sessionId}:
+    get:
+      summary: Get session details with trophies
+      description: |
+        Retrieves session metadata along with all associated trophies.
+        Alternative endpoint that returns both session info and trophies in one call.
+        May be used if this endpoint already exists in the codebase.
+      operationId: getSessionWithTrophies
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Unique identifier of the session
+          schema:
+            type: string
+            format: uuid
+          example: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+      responses:
+        '200':
+          description: Successfully retrieved session with trophies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionWithTrophies'
+              example:
+                id: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+                name: "Team Meeting Trophy Share"
+                createdAt: "2025-12-13T10:00:00Z"
+                status: "Active"
+                trophies:
+                  - id: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+                    sessionId: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+                    userName: "Alice"
+                    modelData: "data:model/gltf-binary;base64,Z2xURg..."
+                    submittedAt: "2025-12-13T10:30:00Z"
+                  - id: "c9b8f12a-1234-5678-9abc-def012345678"
+                    sessionId: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+                    userName: "Bob"
+                    modelData: "data:model/gltf-binary;base64,Z2xURg..."
+                    submittedAt: "2025-12-13T10:35:00Z"
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Trophy:
+      type: object
+      description: A 3D model trophy submission within a session
+      required:
+        - id
+        - sessionId
+        - userName
+        - modelData
+        - submittedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the trophy
+          example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        sessionId:
+          type: string
+          format: uuid
+          description: ID of the session this trophy belongs to
+          example: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+        userName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Name of the user who submitted the trophy
+          example: "Alice"
+        modelData:
+          type: string
+          description: |
+            3D model data, either as a base64-encoded glTF binary or a URL to the model file.
+            Frontend uses this to render the 3D trophy visualization.
+          example: "data:model/gltf-binary;base64,Z2xURgIAAAA..."
+        submittedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the trophy was submitted
+          example: "2025-12-13T10:30:00Z"
+
+    SessionWithTrophies:
+      type: object
+      description: Session metadata with all associated trophies
+      required:
+        - id
+        - name
+        - createdAt
+        - status
+        - trophies
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the session
+          example: "a3bb189e-8bf9-3888-9912-ace4e6543002"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Human-readable name of the session
+          example: "Team Meeting Trophy Share"
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the session was created
+          example: "2025-12-13T10:00:00Z"
+        status:
+          type: string
+          enum: [Active, Closed]
+          description: Current status of the session
+          example: "Active"
+        trophies:
+          type: array
+          description: List of all trophies submitted to this session
+          items:
+            $ref: '#/components/schemas/Trophy'
+
+    Error:
+      type: object
+      description: Error response structure
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Short error identifier
+          example: "Session not found"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "No session found with ID a3bb189e-8bf9-3888-9912-ace4e6543002"
+        details:
+          type: object
+          description: Optional additional error details
+          additionalProperties: true
+
+tags:
+  - name: Trophies
+    description: Operations for managing and retrieving trophy submissions
+  - name: Sessions
+    description: Operations for managing trophy-sharing sessions

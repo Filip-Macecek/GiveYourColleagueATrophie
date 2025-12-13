@@ -56,10 +56,88 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
-.trophies-list h2 {
+.trophies-header {
   margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e8e8e8;
+}
+
+.trophies-header h2 {
+  margin: 0 0 15px 0;
   color: #f5576c;
   font-size: 24px;
+}
+
+/* Polling Controls */
+.polling-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 15px 0;
+}
+
+.polling-controls .refresh-btn,
+.polling-controls .polling-indicator {
+  width: 100%;
+}
+
+/* Error Message Styling */
+.error-message {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 12px 0;
+  font-size: 0.95rem;
+}
+
+/* Present Trophies Button - Flamboyant UI */
+.btn-present-trophies {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(131, 56, 236, 0.5);
+  transition: all 0.3s ease;
+  animation: buttonPulse 2s ease-in-out infinite, slideIn 0.5s ease-out;
+  margin-top: 16px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 1px;
+}
+
+.btn-present-trophies:hover {
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 0 15px 40px rgba(131, 56, 236, 0.8);
+}
+
+.btn-present-trophies:active {
+  transform: scale(0.98);
+}
+
+@keyframes buttonPulse {
+  0%, 100% {
+    box-shadow: 0 10px 30px rgba(131, 56, 236, 0.5);
+  }
+  50% {
+    box-shadow: 0 10px 50px rgba(131, 56, 236, 0.9);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .trophy-items {
@@ -77,7 +155,46 @@
   background: #f8f9fa;
   border-radius: 6px;
   border-left: 4px solid #f5576c;
-  animation: slideIn 0.3s ease-out;
+  animation: slideInItem 0.3s ease-out;
+}
+
+/* New Trophy Highlight Animation */
+.trophy-item.new-trophy {
+  animation: 
+    fadeInHighlight 3s ease forwards,
+    slideInItem 0.3s ease-out;
+}
+
+@keyframes fadeInHighlight {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+    background-color: rgba(255, 215, 0, 0.4);
+    border-left-color: #ffd700;
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.02);
+    background-color: rgba(255, 215, 0, 0.4);
+    border-left-color: #ffd700;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    background-color: #f8f9fa;
+    border-left-color: #f5576c;
+  }
+}
+
+@keyframes slideInItem {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .trophy-number {

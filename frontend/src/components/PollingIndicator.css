@@ -1,0 +1,98 @@
+/* Polling Indicator Component Styles - Flamboyant UI */
+
+.polling-indicator {
+  position: relative;
+  margin: 12px 0;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* LIVE Badge - Pulsing and theatrical */
+.live-badge {
+  background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
+  background-size: 300% 300%;
+  color: white;
+  text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.6), 0 0 40px rgba(0, 255, 255, 0.4);
+  animation: 
+    pulse-scale 1.5s ease-in-out infinite,
+    color-cycle 4s linear infinite,
+    glow 2s ease-in-out infinite;
+}
+
+/* SNOOZING Badge - Gentle and sleepy */
+.paused-badge {
+  background-color: #333;
+  color: #999;
+  text-shadow: none;
+  box-shadow: 0 0 10px rgba(100, 100, 100, 0.3);
+  animation: gentle-fade 3s ease-in-out infinite;
+}
+
+/* Pulsing scale animation for LIVE badge */
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Color cycle for LIVE badge gradient */
+@keyframes color-cycle {
+  0%, 100% {
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    filter: hue-rotate(90deg);
+  }
+  50% {
+    filter: hue-rotate(180deg);
+  }
+  75% {
+    filter: hue-rotate(270deg);
+  }
+}
+
+/* Glow effect for LIVE badge */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(255, 0, 255, 0.6),
+      0 0 40px rgba(0, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(255, 0, 255, 0.8),
+      0 0 60px rgba(0, 255, 255, 0.6);
+  }
+}
+
+/* Gentle fade for SNOOZING badge */
+@keyframes gentle-fade {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@media (max-width: 768px) {
+  .badge {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+}

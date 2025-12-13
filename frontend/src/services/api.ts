@@ -75,6 +75,19 @@ class ApiClient {
   }
 
   /**
+   * Retrieves all trophies for a session (alias for polling).
+   * Used by automatic polling and manual refresh functionality.
+   * 
+   * @param sessionCode The session code
+   * @returns Array of trophy submissions
+   * @throws Error if fetch fails - caller should handle and retry
+   */
+  async getTrophies(sessionCode: string) {
+    const response = await this.client.get(`/sessions/${sessionCode}/trophies`)
+    return response.data
+  }
+
+  /**
    * Retrieves all trophies for a session.
    */
   async listTrophies(sessionCode: string) {

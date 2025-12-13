@@ -1,20 +1,42 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import './SubmissionPage.css'
 import { TrophyForm } from '../components/TrophyForm'
 import { useTrophies } from '../hooks/useTrophies'
 import { useSession } from '../hooks/useSession'
+import { useInactivity } from '../hooks/useInactivity'
+import { useRelativeTime } from '../hooks/useRelativeTime'
+import { RefreshButton } from '../components/RefreshButton'
+import { PollingIndicator } from '../components/PollingIndicator'
+import { LastUpdated } from '../components/LastUpdated'
 
 /**
  * SubmissionPage - Page for team members to submit trophies.
+ * 
+ * Features:
+ * - Automatic polling for new trophies every 3 seconds
+ * - Manual refresh button
+ * - Inactivity detection (pauses polling after 5 minutes)
+ * - Visual "LIVE/SNOOZING" indicator
+ * - "Updated X seconds ago" timestamp
+ * - Highlights new trophies with fade-in animation
+ * - "Present Trophies" button (when 2+ trophies exist)
  */
 export function SubmissionPage() {
   const { sessionCode } = useParams<{ sessionCode: string }>()
-  const { trophies, listTrophies } = useTrophies()
+  const navigate = useNavigate()
+  
+  // Hooks for trophy management and polling
+  const isInactive = useInactivity(300000) // 5 minutes
+  const { trophies, lastUpdated, isRefreshing, error: pollError, refetch, listTrophies } = useTrophies(sessionCode, !isInactive)
   const { session, getSession } = useSession()
+  
+  // Local state
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [previousTrophyIds, setPreviousTrophyIds] = useState<Set<string>>(new Set())
 
+  // Initial load
   useEffect(() => {
     const loadSessionData = async () => {
       if (!sessionCode) return
@@ -36,9 +58,33 @@ export function SubmissionPage() {
     loadSessionData()
   }, [sessionCode, getSession, listTrophies])
 
+  // Track new trophies for highlighting animation
+  useEffect(() => {
+    if (trophies && trophies.length > 0) {
+      const currentIds = new Set(trophies.map((t: any) => t.id))
+      const newIds = trophies.filter((t: any) => !previousTrophyIds.has(t.id)).map((t: any) => t.id)
+      
+      if (newIds.length > 0) {
+        // Keep highlight for 3 seconds, then update previousTrophyIds
+        const timeout = setTimeout(() => {
+          setPreviousTrophyIds(currentIds)
+        }, 3000)
+        return () => clearTimeout(timeout)
+      } else {
+        setPreviousTrophyIds(currentIds)
+      }
+    }
+  }, [trophies, previousTrophyIds])
+
   const handleTrophySubmitted = async () => {
     if (sessionCode) {
-      await listTrophies(sessionCode)
+      await refetch()
+    }
+  }
+
+  const handlePresentClick = () => {
+    if (sessionCode && trophies.length >= 2) {
+      navigate(`/share/${sessionCode}/present`)
     }
   }
 
@@ -84,12 +130,37 @@ export function SubmissionPage() {
             <TrophyForm sessionCode={sessionCode || ''} onSuccess={handleTrophySubmitted} />
           </div>
 
-          {trophies.length > 0 && (
+          {trophies && trophies.length > 0 && (
             <div className="trophies-list">
-              <h2>Trophies Submitted ({trophies.length})</h2>
+              <div className="trophies-header">
+                <h2>Trophies Submitted ({trophies.length})</h2>
+                
+                {/* Polling Controls */}
+                <div className="polling-controls">
+                  <PollingIndicator isActive={!isInactive} />
+                  <RefreshButton onClick={refetch} isRefreshing={isRefreshing} />
+                </div>
+
+                {/* Last Updated Timestamp */}
+                {lastUpdated && <LastUpdated timestamp={lastUpdated} />}
+
+                {/* Error Message from Polling */}
+                {pollError && <div className="error-message">⚠️ {pollError}</div>}
+
+                {/* Present Trophies Button (when 2+ trophies) */}
+                {trophies.length >= 2 && (
+                  <button onClick={handlePresentClick} className="btn-present-trophies">
+                    🎭 PRESENT TROPHIES! 🎭
+                  </button>
+                )}
+              </div>
+
               <div className="trophy-items">
-                {trophies.map((trophy) => (
-                  <div key={trophy.id} className="trophy-item">
+                {trophies.map((trophy: any) => (
+                  <div 
+                    key={trophy.id}
+                    className={`trophy-item ${!previousTrophyIds.has(trophy.id) ? 'new-trophy' : ''}`}
+                  >
                     <div className="trophy-number">{trophy.displayOrder}</div>
                     <div className="trophy-content">
                       <h3>{trophy.recipientName}</h3>

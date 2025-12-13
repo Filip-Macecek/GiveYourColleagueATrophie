@@ -21,7 +21,7 @@ export function SessionPage() {
 
   const handleCopyUrl = () => {
     if (session?.session?.shareableUrl) {
-      const fullUrl = `${window.location.origin}${session.session.shareableUrl}`
+      const fullUrl = `${window.location.origin}${session.shareableUrl}`
       navigator.clipboard.writeText(fullUrl)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
@@ -62,7 +62,7 @@ export function SessionPage() {
             <div className="session-details">
               <div className="detail-item">
                 <label>Session Code:</label>
-                <code className="session-code">{session.session.sessionCode}</code>
+                <code className="session-code">{session.sessionCode}</code>
               </div>
 
               <div className="detail-item">
@@ -71,7 +71,7 @@ export function SessionPage() {
                   <input
                     type="text"
                     readOnly
-                    value={`${window.location.origin}${session.session.shareableUrl}`}
+                    value={`${window.location.origin}${session.shareableUrl}`}
                     className="share-link"
                   />
                   <button onClick={handleCopyUrl} className="btn-copy">
@@ -91,7 +91,7 @@ export function SessionPage() {
                   <p>{session.trophies.length}</p>
 
                   {session.trophies.length >= 1 && (
-                    <a href={`/share/${session.session.sessionCode}/present`} className="btn-primary">
+                    <a href={`/share/${session.sessionCode}/present`} className="btn-primary">
                       🎬 Present Trophies
                     </a>
                   )}
