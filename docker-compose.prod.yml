@@ -28,7 +28,7 @@ services:
       if [ ! -f \"$${CERTDIR}/privkey.pem\" ] || [ ! -f \"$${CERTDIR}/fullchain.pem\" ]; then
         echo 'Generating temporary self-signed certificate for Nginx startup...';
         openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-          -subj \"/CN=$${DOMAIN}\" \
+          -subj \"/C=US/ST=State/L=City/O=Organization/CN=$${DOMAIN}\" \
           -keyout \"$${CERTDIR}/privkey.pem\" \
           -out \"$${CERTDIR}/fullchain.pem\";
       fi;
