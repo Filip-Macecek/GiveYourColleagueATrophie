@@ -28,7 +28,7 @@ services:
       if [ ! -f \"$${CERTDIR}/privkey.pem\" ] || [ ! -f \"$${CERTDIR}/fullchain.pem\" ]; then
         echo 'Generating temporary self-signed certificate for Nginx startup...';
         openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-          -subj \"/C=US/ST=State/L=City/O=Organization/CN=$${DOMAIN}\" \
+          -subj '/C=US/ST=State/L=City/O=Organization/CN='$${DOMAIN} \
           -keyout \"$${CERTDIR}/privkey.pem\" \
           -out \"$${CERTDIR}/fullchain.pem\";
       fi;
@@ -52,7 +52,7 @@ services:
     networks:
       - app
     healthcheck:
-      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:5000 || exit 1"]
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:5000/api/sessions || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -132,9 +132,9 @@ services:
       fi;
       trap 'exit 0' TERM INT;
       while :; do
-        certbot renew --webroot -w /var/www/certbot --deploy-hook "if [ -f /var/run/nginx.pid ]; then kill -s HUP $(cat /var/run/nginx.pid) || true; fi" --quiet $CERTBOT_STAGING || true;
+        certbot renew --webroot -w /var/www/certbot --deploy-hook 'if [ -f /var/run/nginx.pid ]; then kill -s HUP \$(cat /var/run/nginx.pid) || true; fi' --quiet \$CERTBOT_STAGING || true;
         sleep 12h;
-      done
+      done;
       "
     networks:
       - app
