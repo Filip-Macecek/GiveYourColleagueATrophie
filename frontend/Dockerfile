@@ -3,6 +3,10 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Accept build argument for API base URL
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
 # Copy package files
 COPY frontend/package.json frontend/package-lock.json* frontend/yarn.lock* ./
 
@@ -17,7 +21,7 @@ COPY frontend/index.html ./
 # Copy public directory if it exists and has content
 RUN mkdir -p ./public
 
-# Build application
+# Build application with VITE_API_BASE_URL available
 RUN npm run build
 
 # Runtime stage - serve with nginx
