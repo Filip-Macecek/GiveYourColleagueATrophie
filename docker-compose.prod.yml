@@ -128,7 +128,7 @@ services:
       fi;
       if [ ! -f /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem ]; then
         certbot certonly --webroot -w /var/www/certbot -d $${DOMAIN} --email $${EMAIL} --agree-tos --no-eff-email $$CERTBOT_STAGING;
-        if [ -f /var/run/nginx.pid ]; then kill -s HUP $(cat /var/run/nginx.pid) || true; fi;
+        if [ -f /var/run/nginx.pid ]; then kill -s HUP $$(cat /var/run/nginx.pid) || true; fi;
       fi;
       trap 'exit 0' TERM INT;
       while :; do
