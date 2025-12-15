@@ -111,31 +111,31 @@ services:
     depends_on:
       - nginx
     entrypoint: /bin/sh
-    command: >-
-      -c "
-      set -e;
-      DOMAIN=$${DOMAIN:-giveyourcollagueatrophie.online};
-      EMAIL=$${EMAIL:-admin@giveyourcollagueatrophie.online};
-      STAGING=$${STAGING:-false};
-      if [ \"$${STAGING}\" = \"true\" ]; then
-        CERTBOT_STAGING=--staging;
+    command: |
+      -c '
+      set -e
+      DOMAIN=$${DOMAIN:-giveyourcollagueatrophie.online}
+      EMAIL=$${EMAIL:-admin@giveyourcollagueatrophie.online}
+      STAGING=$${STAGING:-false}
+      if [ "$${STAGING}" = "true" ]; then
+        CERTBOT_STAGING=--staging
       else
-        CERTBOT_STAGING="";
-      fi;
-      if [ -z \"$${DOMAIN}\" ] || [ -z \"$${EMAIL}\" ]; then
-        echo 'DOMAIN and EMAIL are required for certificate issuance';
-        exit 1;
-      fi;
+        CERTBOT_STAGING=
+      fi
+      if [ -z "$${DOMAIN}" ] || [ -z "$${EMAIL}" ]; then
+        echo "DOMAIN and EMAIL are required for certificate issuance"
+        exit 1
+      fi
       if [ ! -f /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem ]; then
-        certbot certonly --webroot -w /var/www/certbot -d $${DOMAIN} --email $${EMAIL} --agree-tos --no-eff-email $$CERTBOT_STAGING;
-        if [ -f /var/run/nginx.pid ]; then kill -s HUP $$(cat /var/run/nginx.pid) || true; fi;
-      fi;
-      trap 'exit 0' TERM INT;
+        certbot certonly --webroot -w /var/www/certbot -d $${DOMAIN} --email $${EMAIL} --agree-tos --no-eff-email $$CERTBOT_STAGING
+        if [ -f /var/run/nginx.pid ]; then kill -s HUP $$(cat /var/run/nginx.pid) || true; fi
+      fi
+      trap "exit 0" TERM INT
       while :; do
-        certbot renew --webroot -w /var/www/certbot --deploy-hook "/bin/sh -c 'if [ -f /var/run/nginx.pid ]; then kill -s HUP $$(cat /var/run/nginx.pid) || true; fi'" --quiet $$CERTBOT_STAGING || true;
-        sleep 12h;
-      done;
-      "
+        certbot renew --webroot -w /var/www/certbot --deploy-hook "/bin/sh -c \"if [ -f /var/run/nginx.pid ]; then kill -s HUP $$(cat /var/run/nginx.pid) || true; fi\"" --quiet $$CERTBOT_STAGING || true
+        sleep 12h
+      done
+      '
     networks:
       - app
     restart: unless-stopped
