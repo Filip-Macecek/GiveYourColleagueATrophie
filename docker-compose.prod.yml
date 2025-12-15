@@ -62,7 +62,7 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://giveyourcollagueatrophie.online/api}
+        - VITE_API_BASE_URL=https://giveyourcollagueatrophie.online/api
     image: trophy3d-frontend:prod
     container_name: trophy3d-frontend-prod
     env_file:
