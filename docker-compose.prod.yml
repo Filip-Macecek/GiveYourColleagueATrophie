@@ -1,41 +1,14 @@
 version: "3.9"
 
 volumes:
-  letsencrypt:
-  certbot-challenges:
+  letsencrypt2:
+  certbot-challenges2:
 
 networks:
   app:
     driver: bridge
 
 services:
-  initcerts:
-    image: alpine:3.20
-    container_name: trophy3d-initcerts
-    env_file:
-      - .env.production
-    volumes:
-      - letsencrypt:/etc/letsencrypt
-    entrypoint: /bin/sh
-    command: >-
-      -c "
-      set -e;
-      apk add --no-cache openssl;
-      DOMAIN=$${DOMAIN:-giveyourcollagueatrophie.online};
-      CERTDIR=/etc/letsencrypt/live/$${DOMAIN};
-      mkdir -p \"$${CERTDIR}\";
-      if [ ! -f \"$${CERTDIR}/privkey.pem\" ] || [ ! -f \"$${CERTDIR}/fullchain.pem\" ]; then
-        echo 'Generating temporary self-signed certificate for Nginx startup...';
-        openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-          -subj '/C=US/ST=State/L=City/O=Organization/CN='$${DOMAIN} \
-          -keyout \"$${CERTDIR}/privkey.pem\" \
-          -out \"$${CERTDIR}/fullchain.pem\";
-      fi;
-      echo 'Init certs complete';
-      "
-    networks:
-      - app
-    restart: "no"
   backend:
     build:
       context: .
@@ -79,11 +52,45 @@ services:
       timeout: 10s
       retries: 5
 
+  acme:
+    image: certbot/certbot:latest
+    container_name: trophy3d-acme
+    env_file:
+      - .env.production
+    volumes:
+      - letsencrypt2:/etc/letsencrypt
+      - certbot-challenges2:/var/www/certbot
+    entrypoint: /bin/sh
+    command: |
+      -c '
+      set -e;
+      echo "anything? AAAAAAAAAA";
+      DOMAIN=$${DOMAIN:-giveyourcollagueatrophie.online}
+      EMAIL=$${EMAIL:-admin@giveyourcollagueatrophie.online}
+      echo "checking domain and email";
+      if [ -z "$${DOMAIN}" ] || [ -z "$${EMAIL}" ]; then
+        echo "DOMAIN and EMAIL are required for certificate issuance";
+        exit 1;
+      fi;
+      echo "running certbot";
+      if [ ! -f /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem ]; then
+        certbot certonly --non-interactive --standalone -d $${DOMAIN} --email $${EMAIL} --agree-tos --no-eff-email;
+      fi;
+      echo "certbot finished.";
+      '
+    networks:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: "no"
+
+
   nginx:
     image: nginx:1.25-alpine
     container_name: trophy3d-nginx
     depends_on:
-      - initcerts
+      - acme
       - backend
       - frontend
     ports:
@@ -91,60 +98,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
-      - letsencrypt:/etc/letsencrypt
-      - certbot-challenges:/var/www/certbot
-    networks:
-      - app
-    restart: unless-stopped
-
-  acme:
-    image: certbot/certbot:latest
-    container_name: trophy3d-acme
-    env_file:
-      - .env.production
-    volumes:
-      - letsencrypt:/etc/letsencrypt
-      - certbot-challenges:/var/www/certbot
-    depends_on:
-      - nginx
-    pid: "service:nginx"
-    entrypoint: /bin/sh
-    command: |
-      -c '
-      set -e
-      DOMAIN=$${DOMAIN:-giveyourcollagueatrophie.online}
-      EMAIL=$${EMAIL:-admin@giveyourcollagueatrophie.online}
-      STAGING=$${STAGING:-false}
-
-      echo "[acme] starting at $$(date -Iseconds)"
-      echo "[acme] DOMAIN=$${DOMAIN} STAGING=$${STAGING}"
-      certbot --version || true
-
-      if [ "$${STAGING}" = "true" ]; then
-        CERTBOT_STAGING=--staging
-      else
-        CERTBOT_STAGING=
-      fi
-      if [ -z "$${DOMAIN}" ] || [ -z "$${EMAIL}" ]; then
-        echo "DOMAIN and EMAIL are required for certificate issuance"
-        exit 1
-      fi
-      if [ ! -f /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem ]; then
-        echo "[acme] no existing certificate found; requesting initial certificate..."
-        certbot certonly --webroot -w /var/www/certbot -d $${DOMAIN} --email $${EMAIL} --agree-tos --no-eff-email $$CERTBOT_STAGING
-        kill -s HUP 1 || true
-        echo "[acme] initial issuance completed; nginx reloaded"
-      else
-        echo "[acme] existing certificate found; skipping initial issuance"
-      fi
-      trap "exit 0" TERM INT
-      while :; do
-        echo "[acme] renewal check at $$(date -Iseconds)"
-        certbot renew --webroot -w /var/www/certbot --deploy-hook "kill -s HUP 1 || true" $$CERTBOT_STAGING || true
-        echo "[acme] renewal check finished at $$(date -Iseconds)"
-        sleep 12h
-      done
-      '
+      - letsencrypt2:/etc/letsencrypt
+      - certbot-challenges2:/var/www/certbot
     networks:
       - app
     restart: unless-stopped
