@@ -132,7 +132,7 @@ services:
       fi;
       trap 'exit 0' TERM INT;
       while :; do
-        certbot renew --webroot -w /var/www/certbot --deploy-hook 'if [ -f /var/run/nginx.pid ]; then kill -s HUP \$(cat /var/run/nginx.pid) || true; fi' --quiet \$CERTBOT_STAGING || true;
+        certbot renew --webroot -w /var/www/certbot --deploy-hook 'if [ -f /var/run/nginx.pid ]; then kill -s HUP $$(cat /var/run/nginx.pid) || true; fi' --quiet $$CERTBOT_STAGING || true;
         sleep 12h;
       done;
       "
