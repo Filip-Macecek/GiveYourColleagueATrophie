@@ -80,6 +80,9 @@ curl -I http://giveyourcollagueatrophie.online/.well-known/acme-challenge/test |
 docker compose -f docker-compose.prod.yml exec acme \
     sh -c "certbot renew --dry-run --webroot -w /var/www/certbot"
 
+# If logs appear empty, confirm the container is actually running
+docker compose -f docker-compose.prod.yml ps acme
+
 # Confirm cert files present
 docker compose -f docker-compose.prod.yml exec nginx \
     ls -l /etc/letsencrypt/live/${DOMAIN:-giveyourcollagueatrophie.online}

@@ -115,6 +115,11 @@ services:
       DOMAIN=$${DOMAIN:-giveyourcollagueatrophie.online}
       EMAIL=$${EMAIL:-admin@giveyourcollagueatrophie.online}
       STAGING=$${STAGING:-false}
+
+      echo "[acme] starting at $$(date -Iseconds)"
+      echo "[acme] DOMAIN=$${DOMAIN} STAGING=$${STAGING}"
+      certbot --version || true
+
       if [ "$${STAGING}" = "true" ]; then
         CERTBOT_STAGING=--staging
       else
@@ -125,12 +130,18 @@ services:
         exit 1
       fi
       if [ ! -f /etc/letsencrypt/live/$${DOMAIN}/fullchain.pem ]; then
+        echo "[acme] no existing certificate found; requesting initial certificate..."
         certbot certonly --webroot -w /var/www/certbot -d $${DOMAIN} --email $${EMAIL} --agree-tos --no-eff-email $$CERTBOT_STAGING
         kill -s HUP 1 || true
+        echo "[acme] initial issuance completed; nginx reloaded"
+      else
+        echo "[acme] existing certificate found; skipping initial issuance"
       fi
       trap "exit 0" TERM INT
       while :; do
-        certbot renew --webroot -w /var/www/certbot --deploy-hook "kill -s HUP 1 || true" --quiet $$CERTBOT_STAGING || true
+        echo "[acme] renewal check at $$(date -Iseconds)"
+        certbot renew --webroot -w /var/www/certbot --deploy-hook "kill -s HUP 1 || true" $$CERTBOT_STAGING || true
+        echo "[acme] renewal check finished at $$(date -Iseconds)"
         sleep 12h
       done
       '
