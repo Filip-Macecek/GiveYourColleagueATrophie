@@ -73,6 +73,9 @@ docker run --rm trophy3d-frontend:prod \
 # Follow ACME logs (issuance + 12h renewal loop)
 docker compose -f docker-compose.prod.yml logs -f acme
 
+# On first issuance, you can also verify the HTTP challenge path is reachable (must be 200/404, not a redirect):
+curl -I http://giveyourcollagueatrophie.online/.well-known/acme-challenge/test | head -n 1
+
 # Dry-run renewal on demand
 docker compose -f docker-compose.prod.yml exec acme \
     sh -c "certbot renew --dry-run --webroot -w /var/www/certbot"
@@ -108,6 +111,9 @@ docker compose -f docker-compose.prod.yml down
 ```
 
 Notes:
-- ACME container uses shared PID namespace to signal Nginx (`kill -s HUP 1`) after issuance/renewal.
+- ACME container shares the Nginx PID namespace and reloads Nginx via `kill -s HUP 1` after issuance/renewal.
 - Certificates persist in the `letsencrypt` named volume and are mounted by Nginx.
 - Frontend uses `VITE_API_BASE_URL` (with `/api`) baked at build time; dev uses `.env.development` automatically.
+
+Troubleshooting:
+- If `trophy3d-acme` exits with code `137`, it was SIGKILLed (commonly the VPS OOM killer). On the VPS, confirm with `dmesg -T | tail -n 200 | grep -i oom` and consider enabling swap or using a larger instance.
