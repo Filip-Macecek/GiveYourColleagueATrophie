@@ -161,10 +161,9 @@ export function SubmissionPage() {
                   >
                     <div className="trophy-number">{trophy.displayOrder}</div>
                     <div className="trophy-content">
-                      <h3>{trophy.recipientName}</h3>
-                      <p>{trophy.achievementText}</p>
+                      <p className="trophy-placeholder-text">🏆 Trophy #{trophy.displayOrder} submitted</p>
                       {trophy.submitterName && (
-                        <p className="submitter">by {trophy.submitterName}</p>
+                        <p className="trophy-author">by {trophy.submitterName}</p>
                       )}
                     </div>
                   </div>

@@ -1,8 +1,8 @@
 .trophy-presentation {
   position: relative;
   width: 100%;
-  max-width: 600px;
-  margin: 0 auto 30px;
+  max-width: 900px;
+  margin: 0 auto 20px;
   animation: fadeIn 0.5s ease-out;
 }
 
@@ -20,6 +20,7 @@
 .trophy-visual {
   position: relative;
   width: 100%;
+  min-height: 45vh;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
@@ -42,7 +43,7 @@
 }
 
 .trophy-icon {
-  font-size: 120px;
+  font-size: 160px;
   animation: spin-trophy 8s linear infinite;
   text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
 }
@@ -69,61 +70,42 @@
   margin-top: 20px;
 }
 
-.trophy-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 20px;
-  max-width: 90%;
-  color: white;
+/* Text section below trophy with white background */
+.trophy-text-section {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 16px;
   text-align: center;
-  animation: slideUp 0.5s ease-out;
-  pointer-events: none;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .recipient-name {
-  font-size: 28px;
-  margin: 0 0 8px 0;
-  font-weight: bold;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.7);
-  letter-spacing: 1px;
-  color: #FFD700;
+  font-size: 42px;
+  margin: 0 0 12px 0;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
   max-width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  hyphens: auto;
 }
 
 .achievement-text {
-  font-size: 16px;
-  line-height: 1.4;
-  margin: 0 0 12px 0;
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 0, 0, 0.7);
-  color: #FFFFFF;
+  font-size: 24px;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+  color: #333333;
   max-width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
 .giver-info {
-  font-size: 14px;
+  font-size: 18px;
   margin: 0;
-  opacity: 0.9;
   font-style: italic;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-  color: #E0E0E0;
+  color: #666666;
 }
 
 .submitter-info {

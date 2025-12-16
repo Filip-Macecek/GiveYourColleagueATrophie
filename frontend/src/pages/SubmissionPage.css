@@ -268,3 +268,18 @@
     font-size: 32px;
   }
 }
+
+/* Trophy placeholder and author styles for hidden details */
+.trophy-placeholder-text {
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
+  margin: 0 0 4px 0;
+}
+
+.trophy-author {
+  font-size: 14px;
+  color: #888;
+  font-style: italic;
+  margin: 0;
+}

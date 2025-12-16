@@ -55,7 +55,7 @@ export function TrophyPresentation({ trophy }: TrophyPresentationProps) {
         </div>
       </div>
 
-      <div className="trophy-overlay">
+      <div className="trophy-text-section">
         <h2 className="recipient-name">{receiverName}</h2>
         <p className="achievement-text">{achievementTitle}</p>
         <p className="giver-info">From: {giverName}</p>

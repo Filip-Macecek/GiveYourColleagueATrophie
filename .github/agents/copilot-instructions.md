@@ -11,6 +11,8 @@ Auto-generated from all feature plans. Last updated: 2025-12-13
 - N/A for this feature; consumes existing backend session/trophy endpoints (003-trophy-rizz)
 - Backend: .NET 8 (ASP.NET Core); Frontend: Node.js/Vite + TypeScript + Nginx (container), ACME/certbot companion (container), Docker Compose, ASP.NET Core, Vite (004-production-deploy)
 - N/A (certificates stored in Docker volume at `/etc/letsencrypt`) (004-production-deploy)
+- [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION] (main)
+- [if applicable, e.g., PostgreSQL, CoreData, files or N/A] (main)
 
 - .NET 8 (backend), React (frontend), JavaScript/TypeScript (001-trophy-sharing)
 
@@ -31,9 +33,9 @@ npm test; npm run lint
 .NET 8 (backend), React (frontend), JavaScript/TypeScript: Follow standard conventions
 
 ## Recent Changes
+- main: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
 - 004-production-deploy: Added Backend: .NET 8 (ASP.NET Core); Frontend: Node.js/Vite + TypeScript + Nginx (container), ACME/certbot companion (container), Docker Compose, ASP.NET Core, Vite
 - 003-trophy-rizz: Added Frontend TypeScript (Vite + React), Backend .NET 8 (C#) + React, Vite, `canvas-confetti` (frontend), ASP.NET Core (backend)
-- 003-trophy-rizz: Added Frontend: TypeScript (Vite + React), Backend: .NET 8 C# + Frontend: React, Vite, `canvas-confetti` (NEW), existing hooks/services; Backend: existing session/trophy API
 
 
 <!-- MANUAL ADDITIONS START -->
